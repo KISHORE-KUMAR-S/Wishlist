@@ -12,41 +12,49 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.android.wishlist.data.DummyWishlist
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.android.wishlist.navigation.Screen
+import com.android.wishlist.viewModel.WishViewModel
 import com.android.wishlist.widgets.AppBarView
 import com.android.wishlist.widgets.WishItem
 
 @Composable
-fun HomeView() {
+fun HomeView(
+    navController: NavController,
+    viewModel: WishViewModel
+) {
     val context = LocalContext.current
     Scaffold(
         topBar = {
-            AppBarView(title = "Wishlist", onBackNavClicked = Toast.makeText(context, "Button Clicked", Toast.LENGTH_SHORT)::show)
+            AppBarView(
+                title = "Wishlist",
+                onBackNavClicked = Toast.makeText(context, "Button Clicked", Toast.LENGTH_SHORT)::show
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
                 modifier = Modifier.padding(20.dp),
                 contentColor = Color.White,
                 containerColor = Color.Black,
-                onClick = {
-                    Toast.makeText(context, "FAB Clicked", Toast.LENGTH_SHORT).show()
-                }
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null)
-            }
+                onClick = { navController.navigate(Screen.AddScreen.route) }
+            ) { Icon(imageVector = Icons.Default.Add, contentDescription = null) }
         },
         floatingActionButtonPosition = FabPosition.End,
         containerColor = Color.Red
     ) {
+        val wishlist = viewModel.getAllWishes.collectAsState(initial = listOf())
         LazyColumn(modifier = Modifier
             .fillMaxSize()
             .padding(it)) {
-                items(DummyWishlist.wishList) {
+                items(wishlist.value) {
                     wish -> WishItem(wish = wish) {
 
                     }
@@ -57,6 +65,4 @@ fun HomeView() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun HomeViewPreview() {
-    HomeView()
-}
+fun HomeViewPreview() = HomeView(navController = rememberNavController(), viewModel = viewModel())
