@@ -13,6 +13,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,6 +42,15 @@ fun AddEditDetailView(
     val snackMessage = remember{ mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    if(id != 0L) {
+        val wish = viewModel.getAWishById(id).collectAsState(initial = Wish(0L, "", ""))
+        viewModel.wishTitleState = wish.value.title
+        viewModel.wishDescriptionState = wish.value.description
+    } else {
+        viewModel.wishTitleState = ""
+        viewModel.wishDescriptionState = ""
+    }
 
     Scaffold (
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -72,6 +82,16 @@ fun AddEditDetailView(
                 if(viewModel.wishTitleState.isNotEmpty() && viewModel.wishDescriptionState.isNotEmpty()) {
                     if(id != 0L) {
                         // TODO: Update Wish
+                        viewModel.updateWish(
+                            wish = Wish(
+                                id = id,
+                                title = viewModel.wishTitleState.trim(),
+                                description = viewModel.wishDescriptionState.trim()
+                            )
+
+                        )
+
+                        snackMessage.value = "Wishlist has been updated"
                     } else {
                         // TODO: Add Wish
                         viewModel.addWish(
